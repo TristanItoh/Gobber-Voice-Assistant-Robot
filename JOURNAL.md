@@ -34,3 +34,14 @@ And that's pretty much most of the planning done. All I need to do next:
 - Create some code
 - Create face animations
 ### Total Session Time: 3 Hours
+
+## Day 2 - June 16
+I had some spare time, but didn't want to do anything big, so I made some animations for the face display!<br>
+![look](https://github.com/user-attachments/assets/466af7c2-ba65-4422-b91c-47d8f9b18275)
+![blink](https://github.com/user-attachments/assets/50b4fca7-f5b4-456d-83e2-485f1c379eeb)
+![smile](https://github.com/user-attachments/assets/9b58a69f-6c5d-4c94-a00c-a0e9838cd946)<br>
+Here are they. The gifs dont loop so you might have missed them. I'm not sure if im going to keep these animations in the future. Who knows, maybe i'll come up with a whole different style I'll want it to be in.<br>
+![smile](https://github.com/user-attachments/assets/4df7413a-0db5-4f29-92ed-d085e339997b)
+![look](https://github.com/user-attachments/assets/6197b0e1-8045-48bf-9956-d66add271f00)
+![blink](https://github.com/user-attachments/assets/cc569052-dd62-488b-8548-2fd44cfd2efc)<br>
+### Total Session Time: 1.5 Hours
