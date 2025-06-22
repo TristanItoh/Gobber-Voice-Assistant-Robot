@@ -45,3 +45,17 @@ Here are they. The gifs dont loop so you might have missed them. I'm not sure if
 ![look](https://github.com/user-attachments/assets/6197b0e1-8045-48bf-9956-d66add271f00)
 ![blink](https://github.com/user-attachments/assets/cc569052-dd62-488b-8548-2fd44cfd2efc)<br>
 ### Total Session Time: 1.5 Hours
+
+## Day 3 and 4 - June 21/22
+Alright now I've started working on the code. For now its just the computer side with the AI. I coded it fairly quickly, using Gemini, ElevenLabs, and OpenAI Whisper. I was using a diffent text to speech but it sounded kind of bad so I switched to the more realistic ElevenLabs. Only problem is the 10k characters a month limit. I'll break down what each thing does now:
+- Gemini - AI LLM, get text from Whisper and put it through gemini + a default prompt included in all of them, telling it its role.
+- OpenAI Whisper - Recieve mp3 files and convert them to text very accurately
+- ElevenLabs - Convert gemini response to mp3 with realistic voice (currently a pirate)<br>
+Then at the very end, save it to an mp3 file.<br>
+
+So now that that part is out of the way, if i break down the to-do list more:
+- Create basic CAD model
+- Complete wiring diagram
+- Create basic framwork for esp32 code
+- Create rest of face animations
+### Total Session Time: 3 Hours
