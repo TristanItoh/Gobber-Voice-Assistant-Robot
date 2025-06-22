@@ -58,4 +58,6 @@ So now that that part is out of the way, if i break down the to-do list more:
 - Complete wiring diagram
 - Create basic framwork for esp32 code
 - Create rest of face animations
-### Total Session Time: 3 Hours
+
+Oh yeah and i accidentally published the code with all the keys in it. tried to fix it with .env and gitignore but didnt work and gave up and just made it private...
+### Total Session Time: 4 Hours
