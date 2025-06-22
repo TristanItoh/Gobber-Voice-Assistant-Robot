@@ -1,3 +1,5 @@
+import os
+from dotenv import load_dotenv
 from google import genai
 from elevenlabs import ElevenLabs
 import whisper
@@ -5,12 +7,17 @@ import time
 import random
 from pydub.utils import mediainfo
 
+# === Load .env ===
+load_dotenv()
+ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
+GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+
 # === ElevenLabs Setup ===
-tts_client = ElevenLabs(api_key="sk_60694c8c75fa90f0c697c124d0f4d5446b689b4d31aa3b58")
+tts_client = ElevenLabs(api_key=ELEVENLABS_API_KEY)
 
 # === Gemini Function ===
 def ask_gemini(prompt: str) -> str:
-    client = genai.Client(api_key="AIzaSyCP67kbJyehaJrCnv99X0RlJQ3SR6HsPhk")
+    client = genai.Client(api_key=GOOGLE_API_KEY)
     response = client.models.generate_content(
         model="gemini-2.0-flash", contents=prompt
     )
@@ -41,7 +48,6 @@ def play_talking_animation(duration_sec):
     print("🎭 Face: close mouth") # Close mouth once after talking
     print("🎭 Face: neutral")
 
-
 # === Idle Animation Simulation ===
 print("🤖 Bot is idle...")
 for _ in range(3):
@@ -49,9 +55,7 @@ for _ in range(3):
 
 print("🔊 Loading MP3 for transcription...")
 
-
 # === Whisper Speech-to-Text ===
-print("🔊 Loading MP3 for transcription...")
 model = whisper.load_model("base")
 result = model.transcribe("prompt.mp3")
 
@@ -81,10 +85,6 @@ print("🤖 Thinking...")
 ai_response = ask_gemini(full_prompt)
 print(f"🤖 Bot says: {ai_response}")
 
-# === Animation Placeholder ===
-print("🎭 Face: talking")
-print("🎭 Face: neutral")
-
 # === TTS with ElevenLabs ===
 audio = tts_client.text_to_speech.convert(
     text=ai_response,
@@ -103,4 +103,3 @@ info = mediainfo("response.mp3")
 duration = float(info['duration'])
 
 play_talking_animation(duration)
-
