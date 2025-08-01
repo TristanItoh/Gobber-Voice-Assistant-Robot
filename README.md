@@ -1,1 +1,33 @@
-# GOB-Voice-Assistant
+# Gobber: Voice Assistant Robot 🤖
+A voice assistant robot that listens to requests and responds, powered by Gemini and OpenAI Whisper, all with custom animations to give it a personality.
+
+## Why?
+I've been wanting to make this project for a while but never fully commited to it. Now I finally have the opportunity to. The project is inspired by voice assistants on mobile devices, like Siri, but with a physical body and animated face.
+
+## Technical Overview:
+This robot uses a combination of hardware, software, and firmware:
+- 🔧 **Hardware**: Controlled by an ESP32-S3 that will be plugged into the computer, recieves input from the microphone, and outputs audio through the audio amp and speaker.
+- 🪲 **Firmware**: Basic code for the ESP32 as sort of a gate between the hardware and the Python software on the computer. Audio in, audio out.
+- 💻 **Software**: Recieves mp3 files of input audio, translates it to text using OpenAI whisper, passes it into Gemini with context, then finally generates text-to-speech using ElevenLabs with a goofy voice.
+- 🔩 **CAD**: Very smooth, curvy, triangular shape. Round display centered on the front, with holes for USB-c, microphone, and speaker.
+
+<img width="1051" height="950" alt="Screenshot 2025-07-31 185853" src="https://github.com/user-attachments/assets/b8ddd656-c2fc-4fae-9815-ac807235c0cb" />
+<img width="990" height="1079" alt="Screenshot 2025-07-31 195330" src="https://github.com/user-attachments/assets/282c9ee6-6aba-4059-9938-6b4f43bbb64a" />
+
+## Wiring Diagram:
+<img width="1280" height="720" alt="wire diagram voice box (1)" src="https://github.com/user-attachments/assets/871a1bcb-2a1b-4f73-8e3d-67a23f7da3da" />
+
+## BOM
+| Item             | Description                          | Amount | Total Cost         |
+|------------------|--------------------------------------|--------|---------------------|
+| Round Display    | 1.28" TFT LCD GC9A01                 | 1      | $3.80               |
+| Microphone Module| I2S INMP441 Microphone               | 1      | 0 (Already Have)    |
+| Speaker Module   | 4 ohm 3 watt                         | 1      | 0 (Already Have)    |
+| Audio Amp        | MAX98357A Audio Amplifier Module     | 1      | 0 (Already Have)    |
+| ESP32 S3         | N16R8                                | 1      | $6.60               |
+| USB-C Cable      | For power and programming            | 1      | 0 (Already Have)    |
+| Jumper Wires     |                                      | ~20    | 0 (Already Have)    |
+| Breadboard       | For prototyping                      | 1      | 0 (Already Have)    |
+**Total:** **$10.40**          
+
+[Sheet With Links](https://docs.google.com/spreadsheets/d/1rEzeNBBt6LBTQF6fnU12Dy_3lUBRjMwdXFT9IxuN5R0/edit?usp=sharing)
