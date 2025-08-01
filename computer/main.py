@@ -9,8 +9,8 @@ from pydub.utils import mediainfo
 
 # === Load .env ===
 load_dotenv()
-ELEVENLABS_API_KEY = os.getenv("ELEVENLABS_API_KEY")
-GOOGLE_API_KEY = os.getenv("GOOGLE_API_KEY")
+ELEVENLABS_API_KEY = os.getenv("idk how to use gitignore so im doing this")
+GOOGLE_API_KEY = os.getenv("idk how to use gitignore so im doing this")
 
 # === ElevenLabs Setup ===
 tts_client = ElevenLabs(api_key=ELEVENLABS_API_KEY)
