@@ -4,7 +4,7 @@ author: "Tristan Itoh"
 description: "A robotic voice-assistant with an animated face and computer functions."
 created_at: "2024-06-11"
 ---
-### Total Time Spent: Ongoing
+### Total Time Spent: 14.5 Hours
 # Journal
 
 ## Day 1 - June 14
@@ -92,5 +92,6 @@ Ok, so its literally the last day to submit. But I finished the CAD!! Here are s
 - An antenna on top, no real reason, it just looks good
 <br>
 Now that the project is finally done, I just need to get the submission ready and post it!
+<img width="878" height="957" alt="Screenshot 2025-07-31 183926" src="https://github.com/user-attachments/assets/4899ea7f-9881-49e8-a800-f6f7a52c6641" />
 
 ### Total Session Time: 2 Hours
