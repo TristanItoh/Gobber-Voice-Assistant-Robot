@@ -61,3 +61,36 @@ So now that that part is out of the way, if i break down the to-do list more:
 
 Oh yeah and i accidentally published the code with all the keys in it. tried to fix it with .env and gitignore but didnt work and gave up and just made it private...
 ### Total Session Time: 4 Hours
+
+## Day 5 (Part 1) - July 30
+It's been a while...<br>
+
+I've kind of forgot to journal after Undercity. But I haven't made much progress over that time anyways. I've been working on the CAD and BOM. Both are pretty much finished, but I still need to tweak the CAD a little bit to fit the display properly, and then actually put models of all the electronics in it. I also finished the wiring diagram. I don't have much time so I also just gave up on more face animations. The one's I already made will work fine, but more would have been nice. The only exceptions were that I did make animations for opening mouth, talking, and closing mouth. I'm gonna do a quick dump of everything below, and continue after:<br>
+<img width="1280" height="720" alt="wire diagram voice box (1)" src="https://github.com/user-attachments/assets/d227a3bd-3cae-4722-b931-08857496345e" />
+![closeMouth](https://github.com/user-attachments/assets/6b78dafd-0615-43e8-9070-187b586e8477)
+![openMouth](https://github.com/user-attachments/assets/d07998ca-b248-4012-ad98-396487e262b7)
+![talk](https://github.com/user-attachments/assets/5a49ec37-dcd3-4fe5-8118-2d938bb1b883)
+![talkloop](https://github.com/user-attachments/assets/72496ca6-d121-48d7-be71-285fe4da7b19)
+<br>
+**Now what's left:**
+- Finish CAD
+- Create basic framework for esp32 code
+
+## Day 5 (Part 2) - July 30
+
+Ok, ESP code is done. It's all AI generated but whatever, it's not like I can actually test it yet. Now just some final touches on the CAD.
+
+### Total Session Time (Part 1 and 2): 4 Hours
+
+## Day 6 - July 31
+
+Ok, so its literally the last day to submit. But I finished the CAD!! Here are some design choices I made:
+- Split into a top and bottom part with pegs that fit together
+- Holes for the microphone and speaker, with that one circle design so its not complete holes
+- More specific spots for stuff inside of it, initially I was planning to just randomly cram everything into it
+- Hole for USB-c
+- An antenna on top, no real reason, it just looks good
+<br>
+Now that the project is finally done, I just need to get the submission ready and post it!
+
+### Total Session Time: 2 Hours
