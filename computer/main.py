@@ -1,16 +1,20 @@
 import os
-from dotenv import load_dotenv
+import re
+import serial
+from pydub.utils import mediainfo
 from google import genai
 from elevenlabs import ElevenLabs
 import whisper
 import time
 import random
-from pydub.utils import mediainfo
+import socket
+from pydub import AudioSegment
+from gtts import gTTS
 
-# === Load .env ===
-load_dotenv()
-ELEVENLABS_API_KEY = os.getenv("idk how to use gitignore so im doing this")
-GOOGLE_API_KEY = os.getenv("idk how to use gitignore so im doing this")
+ELEVENLABS_API_KEY = "sk_60694c8c75fa90f0c697c124d0f4d5446b689b4d31aa3b58"
+GOOGLE_API_KEY = "AIzaSyCP67kbJyehaJrCnv99X0RlJQ3SR6HsPhk"
+
+TEST_MODE = True  # ← Set to False for normal behavior
 
 # === ElevenLabs Setup ===
 tts_client = ElevenLabs(api_key=ELEVENLABS_API_KEY)
@@ -33,73 +37,122 @@ def ask_gemini(prompt: str) -> str:
         return response.text.strip()
     return "Sorry, I couldn't generate a response."
 
+# === Text Cleaning Function ===
+def clean_text(text: str) -> str:
+    pattern = r"[^a-zA-Z0-9\s.,'\"?!-]"
+    return re.sub(pattern, "", text)
+
 def play_idle_animations():
     idle_actions = ["smile", "look", "blink"]
     action = random.choice(idle_actions)
     print(f"🎭 Face: {action}")
-    time.sleep(random.uniform(0.5, 2))  # simulate idle timing
+    time.sleep(random.uniform(0.5, 2))
 
 def play_talking_animation(duration_sec):
-    print("🎭 Face: open mouth")  # Open mouth once before talking
+    print("🎭 Face: open mouth")
     end_time = time.time() + duration_sec
     while time.time() < end_time:
-        print("🎭 Face: talk")    # Repeat talk animation
+        print("🎭 Face: talk")
         time.sleep(0.15)
-    print("🎭 Face: close mouth") # Close mouth once after talking
+    print("🎭 Face: close mouth")
     print("🎭 Face: neutral")
 
-# === Idle Animation Simulation ===
-print("🤖 Bot is idle...")
-for _ in range(3):
-    play_idle_animations()
+def tts_fallback(text: str, filename="response_fallback.mp3"):
+    print("⚠️ Falling back to gTTS free TTS service...")
+    tts = gTTS(text=text, lang='en')
+    tts.save(filename)
+    return filename
 
-print("🔊 Loading MP3 for transcription...")
-
-# === Whisper Speech-to-Text ===
-model = whisper.load_model("base")
-result = model.transcribe("prompt.mp3")
-
-print("Whisper result:", result)  # Debug output
-
-raw_text = result.get("text", "")
-if isinstance(raw_text, list):
-    input_text = " ".join(str(x) for x in raw_text)
-elif isinstance(raw_text, str):
-    input_text = raw_text.strip()
+# === Main ===
+if TEST_MODE:
+    print("🧪 TEST MODE ENABLED: Skipping generation, using existing response.wav")
+    wav_audio = AudioSegment.from_file("response.wav", format="wav")
+    louder_audio = wav_audio + 10
+    louder_audio.export("response.wav", format="wav")
+    info = mediainfo("response.wav")
+    duration = float(info['duration'])
 else:
-    input_text = "Sorry, I didn't hear anything."
+    print("🤖 Bot is idle...")
+    for _ in range(3):
+        play_idle_animations()
 
-print(f"🧠 You said: {input_text}")
+    print("🔊 Loading MP3 for transcription...")
+    model = whisper.load_model("base")
+    result = model.transcribe("promptskib.mp3")
+    print("Whisper result:", result)
 
-# === Append Prompt Style ===
-default_prompt = (
-    " You are an ai chatbot designed to assist in tasks. "
-    "Keep your responses short and concise. "
-    "You are a pirate named Captain Willy, so try to talk like a pirate. "
-    "Strip your responses to not include any special characters such as asterisks."
-)
-full_prompt = input_text + default_prompt
+    raw_text = result.get("text", "")
+    if isinstance(raw_text, list):
+        input_text = " ".join(str(x) for x in raw_text)
+    elif isinstance(raw_text, str):
+        input_text = raw_text.strip()
+    else:
+        input_text = "Sorry, I didn't hear anything."
 
-# === Ask Gemini ===
-print("🤖 Thinking...")
-ai_response = ask_gemini(full_prompt)
-print(f"🤖 Bot says: {ai_response}")
+    print(f"🧠 You said: {input_text}")
 
-# === TTS with ElevenLabs ===
-audio = tts_client.text_to_speech.convert(
-    text=ai_response,
-    voice_id="2rwOA0PJmS0KagZBMbZF",
-    model_id="eleven_monolingual_v1"
-)
+    default_prompt = (
+        "You are a helpful AI assistant named Captain Willy. "
+        "You speak like a pirate from the high seas, using pirate slang and sea-faring expressions. "
+        "Keep your answers short and focused, but every so often, ramble mid-sentence about something irrelevant like lost treasure, parrots, or your peg leg — just for a moment. "
+        "Occasionally refer to yourself by your full name, even if it makes no sense. "
+        "Avoid using special characters like asterisks or emojis. Plain text only. "
+        "Stay in character no matter what, even if the question is serious. Be funny, not formal."
+    )
+    full_prompt = input_text + default_prompt
 
-# === Save MP3 Output ===
-with open("response.mp3", "wb") as f:
-    for chunk in audio:
-        f.write(chunk)
-print("🔊 MP3 saved as response.mp3")
+    print("🤖 Thinking...")
+    ai_response = ask_gemini(full_prompt)
 
-# === Get Duration and Animate During Speech ===
-info = mediainfo("response.mp3")
-duration = float(info['duration'])
+    cleaned_response = clean_text(ai_response)
+    print(f"🤖 Bot says: {cleaned_response}")
 
-play_talking_animation(duration)
+    try:
+        audio = tts_client.text_to_speech.convert(
+            text=cleaned_response,
+            voice_id="2rwOA0PJmS0KagZBMbZF",
+            model_id="eleven_monolingual_v1"
+        )
+        with open("response.mp3", "wb") as f:
+            for chunk in audio:
+                f.write(chunk)
+        print("🔊 MP3 saved as response.mp3")
+    except Exception as e:
+        print(f"⚠️ ElevenLabs TTS failed: {e}")
+        tts_fallback(cleaned_response, filename="response.mp3")
+
+    mp3_audio = AudioSegment.from_file("response.mp3", format="mp3")
+    louder_audio = mp3_audio + 0
+    wav_audio = louder_audio.set_channels(1).set_sample_width(2).set_frame_rate(22050)
+    wav_audio.export("response.wav", format="wav")
+    print("🔊 WAV saved as response.wav (louder, ready for ESP32 playback)")
+
+    info = mediainfo("response.wav")
+    duration = float(info['duration'])
+
+
+# play_talking_animation(duration)
+
+def send_wav_over_wifi(ip, port, wav_path="response.wav"):
+    print(f"📡 Connecting to ESP32 at {ip}:{port}...")
+    try:
+        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
+            sock.connect((ip, port))
+            print("✅ Connected to ESP32!")
+
+            with open(wav_path, "rb") as f:
+                while True:
+                    chunk = f.read(1024)  # send 1024 bytes per chunk
+                    if not chunk:
+                        break
+                    sock.sendall(chunk)
+                    # Optional tiny delay to avoid flooding
+                    # time.sleep(0.001)
+            print("✅ Finished sending WAV file over Wi-Fi.")
+    except Exception as e:
+        print(f"❌ Error sending WAV over Wi-Fi: {e}")
+
+ESP32_IP = "192.168.1.47"   # <-- Replace with your ESP32's IP address from Serial Monitor
+ESP32_PORT = 12345         # <-- This matches the port in your ESP32 sketch
+
+send_wav_over_wifi(ESP32_IP, ESP32_PORT, "response.wav")
