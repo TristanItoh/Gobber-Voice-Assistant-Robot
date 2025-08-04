@@ -15,7 +15,8 @@ This robot uses a combination of hardware, software, and firmware:
 <img width="990" height="1079" alt="Screenshot 2025-07-31 195330" src="https://github.com/user-attachments/assets/282c9ee6-6aba-4059-9938-6b4f43bbb64a" />
 
 ## Wiring Diagram:
-<img width="1280" height="720" alt="wire diagram voice box (1)" src="https://github.com/user-attachments/assets/871a1bcb-2a1b-4f73-8e3d-67a23f7da3da" />
+<img width="1280" height="720" alt="wire diagram voice box (2)" src="https://github.com/user-attachments/assets/78431c7c-97ca-4379-861a-5b4573f17bc5" />
+
 
 ## BOM
 | Item             | Description                          | Amount | Total Cost         |
