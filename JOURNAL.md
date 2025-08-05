@@ -93,5 +93,6 @@ Ok, so its literally the last day to submit. But I finished the CAD!! Here are s
 <br>
 Now that the project is finally done, I just need to get the submission ready and post it!
 <img width="878" height="957" alt="Screenshot 2025-07-31 183926" src="https://github.com/user-attachments/assets/4899ea7f-9881-49e8-a800-f6f7a52c6641" />
+<img width="1245" height="629" alt="Screenshot 2025-08-04 182248" src="https://github.com/user-attachments/assets/151c78fe-5ea2-4387-bea5-3095bf167230" />
 
 ### Total Session Time: 2 Hours
