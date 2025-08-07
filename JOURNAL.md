@@ -67,7 +67,7 @@ It's been a while...<br>
 
 I've kind of forgot to journal after Undercity. But I haven't made much progress over that time anyways. I've been working on the CAD and BOM. To make it smooth and curvy I made the initial shape in Womp:
 <img width="698" height="585" alt="Screenshot 2025-08-04 182659" src="https://github.com/user-attachments/assets/1923a179-45ba-41a0-bd12-91dedf9cf109" /><Br>
-Both the CAD and BOM are pretty much finished, but I still need to tweak the CAD a little bit to fit the display properly, and then actually put models of all the electronics in it. I also finished the wiring diagram. I don't have much time so I also just gave up on more face animations. The one's I already made will work fine, but more would have been nice. The only exceptions were that I did make animations for opening mouth, talking, and closing mouth. I'm gonna do a quick dump of everything below, and continue after:<br>
+I made it into a pyramid using AI to make sure its a perfect shape, then adjusted the levels in Womp to make the curves between them look how I was hoping. After I got it into that nice curvy pyramid, I imported it into Tinkercad to do all the small stuff (like putting electronics in it). Both the CAD and BOM are pretty much finished, but I still need to tweak the CAD a little bit to fit the display properly, and then actually put models of all the electronics in it. I also finished the wiring diagram. I don't have much time so I also just gave up on more face animations. The one's I already made will work fine, but more would have been nice. The only exceptions were that I did make animations for opening mouth, talking, and closing mouth. I'm gonna do a quick dump of everything below, and continue after:<br>
 <img width="1280" height="720" alt="wire diagram voice box (1)" src="https://github.com/user-attachments/assets/d227a3bd-3cae-4722-b931-08857496345e" />
 ![closeMouth](https://github.com/user-attachments/assets/6b78dafd-0615-43e8-9070-187b586e8477)
 ![openMouth](https://github.com/user-attachments/assets/d07998ca-b248-4012-ad98-396487e262b7)
@@ -86,7 +86,7 @@ Ok, ESP code is done. It's all AI generated but whatever, it's not like I can ac
 
 ## Day 6 - July 31
 
-Ok, so its literally the last day to submit. But I finished the CAD!! Here are some design choices I made:
+Ok, so its literally the last day to submit. But I finished the CAD!! I took measurements of the electronic components I was using and remade then in CAD and placed them into my robot. I made sure they would all fit well, added small tolerances, and even added some slots in the bottom to put the esp32 and breadboard. Here are some design choices I made:
 - Split into a top and bottom part with pegs that fit together
 - Holes for the microphone and speaker, with that one circle design so its not complete holes
 - More specific spots for stuff inside of it, initially I was planning to just randomly cram everything into it
