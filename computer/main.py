@@ -1,158 +1,237 @@
+import socket
+import time
+import numpy as np
+import pvporcupine
+import whisper
+from pydub import AudioSegment
+from pydub.utils import mediainfo
 import os
 import re
-import serial
-from pydub.utils import mediainfo
-from google import genai
-from elevenlabs import ElevenLabs
-import whisper
-import time
-import random
-import socket
-from pydub import AudioSegment
+import google.generativeai as genai
 from gtts import gTTS
+import random
 
-ELEVENLABS_API_KEY = "sk_60694c8c75fa90f0c697c124d0f4d5446b689b4d31aa3b58"
-GOOGLE_API_KEY = "AIzaSyCP67kbJyehaJrCnv99X0RlJQ3SR6HsPhk"
+# === Configuration ===
+# --- Network ---
+ESP32_IP = "192.168.1.47"  # <-- IMPORTANT: Set to your ESP32's IP address
+PORT = 12345
 
-TEST_MODE = True  # ← Set to False for normal behavior
+# --- Audio ---
+SAMPLE_RATE = 16000  # Porcupine's required sample rate
+CHANNELS = 1
+BYTES_PER_SAMPLE_I2S = 4 # 32-bit audio from I2S mic
+BYTES_PER_SAMPLE_PCM = 2 # 16-bit audio for Porcupine/Whisper
 
-# === ElevenLabs Setup ===
-tts_client = ElevenLabs(api_key=ELEVENLABS_API_KEY)
+# --- API Keys ---
+PORCUPINE_ACCESS_KEY = "oops im not leaking that" # Replace with your key
+# ELEVENLABS_API_KEY = "oops im not leaking that" # Not needed for gTTS
+GOOGLE_API_KEY = "oops im not leaking that"      # Replace with your key
 
-# === Gemini Function ===
+# --- File Paths ---
+WAKE_WORD_PATH = "Hey-Gobber.ppn"
+PROMPT_WAV_PATH = "prompt.wav"
+RESPONSE_WAV_PATH = "response.wav"
+
+# === Initialization ===
+# --- Porcupine Wake Word Engine ---
+try:
+    porcupine = pvporcupine.create(
+        access_key=PORCUPINE_ACCESS_KEY,
+        keyword_paths=[WAKE_WORD_PATH]
+    )
+    BUFFER_SIZE_PORCUPINE_FRAME = porcupine.frame_length * BYTES_PER_SAMPLE_I2S
+    print("✅ Porcupine wake word engine initialized.")
+except Exception as e:
+    print(f"❌ Error initializing Porcupine: {e}")
+    porcupine = None
+
+# --- Whisper Speech-to-Text ---
+try:
+    whisper_model = whisper.load_model("base")
+    print("✅ Whisper model loaded.")
+except Exception as e:
+    print(f"❌ Error loading Whisper model: {e}")
+    whisper_model = None
+
+
+# --- Gemini AI ---
+try:
+    genai.configure(api_key=GOOGLE_API_KEY)
+    gemini_model = genai.GenerativeModel('gemini-1.5-flash-latest')
+    print("✅ Gemini client initialized.")
+except Exception as e:
+    print(f"❌ Error initializing Gemini client: {e}")
+    gemini_model = None
+
+
+# === Core Functions ===
+
+def convert_i2s_to_pcm(raw_data):
+    """Converts 32-bit I2S audio data (bytes) to a 16-bit PCM numpy array."""
+    int32_data = np.frombuffer(raw_data, dtype=np.int32)
+    int16_data = (int32_data >> 14).astype(np.int16)
+    return int16_data
+
+def save_pcm_to_wav(pcm_data, filename, sample_rate, channels):
+    """Saves a 16-bit PCM numpy array to a WAV file."""
+    audio = AudioSegment(
+        pcm_data.tobytes(),
+        frame_rate=sample_rate,
+        sample_width=BYTES_PER_SAMPLE_PCM,
+        channels=channels
+    )
+    audio.export(filename, format="wav")
+    print(f"✅ Audio saved to {filename}")
+
 def ask_gemini(prompt: str) -> str:
-    client = genai.Client(api_key=GOOGLE_API_KEY)
-    response = client.models.generate_content(
-        model="gemini-2.0-flash", contents=prompt
-    )
-    if response and hasattr(response, 'candidates') and response.candidates:
-        candidate = response.candidates[0]
-        if candidate and hasattr(candidate, 'content') and candidate.content:
-            content = candidate.content
-            if hasattr(content, 'parts') and content.parts:
-                part = content.parts[0]
-                if part and hasattr(part, 'text') and part.text:
-                    return part.text.strip()
-    elif response and hasattr(response, 'text') and response.text:
-        return response.text.strip()
-    return "Sorry, I couldn't generate a response."
-
-# === Text Cleaning Function ===
-def clean_text(text: str) -> str:
-    pattern = r"[^a-zA-Z0-9\s.,'\"?!-]"
-    return re.sub(pattern, "", text)
-
-def play_idle_animations():
-    idle_actions = ["smile", "look", "blink"]
-    action = random.choice(idle_actions)
-    print(f"🎭 Face: {action}")
-    time.sleep(random.uniform(0.5, 2))
-
-def play_talking_animation(duration_sec):
-    print("🎭 Face: open mouth")
-    end_time = time.time() + duration_sec
-    while time.time() < end_time:
-        print("🎭 Face: talk")
-        time.sleep(0.15)
-    print("🎭 Face: close mouth")
-    print("🎭 Face: neutral")
-
-def tts_fallback(text: str, filename="response_fallback.mp3"):
-    print("⚠️ Falling back to gTTS free TTS service...")
-    tts = gTTS(text=text, lang='en')
-    tts.save(filename)
-    return filename
-
-# === Main ===
-if TEST_MODE:
-    print("🧪 TEST MODE ENABLED: Skipping generation, using existing response.wav")
-    wav_audio = AudioSegment.from_file("response.wav", format="wav")
-    louder_audio = wav_audio + 10
-    louder_audio.export("response.wav", format="wav")
-    info = mediainfo("response.wav")
-    duration = float(info['duration'])
-else:
-    print("🤖 Bot is idle...")
-    for _ in range(3):
-        play_idle_animations()
-
-    print("🔊 Loading MP3 for transcription...")
-    model = whisper.load_model("base")
-    result = model.transcribe("promptskib.mp3")
-    print("Whisper result:", result)
-
-    raw_text = result.get("text", "")
-    if isinstance(raw_text, list):
-        input_text = " ".join(str(x) for x in raw_text)
-    elif isinstance(raw_text, str):
-        input_text = raw_text.strip()
-    else:
-        input_text = "Sorry, I didn't hear anything."
-
-    print(f"🧠 You said: {input_text}")
-
-    default_prompt = (
-        "You are a helpful AI assistant named Captain Willy. "
-        "You speak like a pirate from the high seas, using pirate slang and sea-faring expressions. "
-        "Keep your answers short and focused, but every so often, ramble mid-sentence about something irrelevant like lost treasure, parrots, or your peg leg — just for a moment. "
-        "Occasionally refer to yourself by your full name, even if it makes no sense. "
-        "Avoid using special characters like asterisks or emojis. Plain text only. "
-        "Stay in character no matter what, even if the question is serious. Be funny, not formal."
-    )
-    full_prompt = input_text + default_prompt
-
-    print("🤖 Thinking...")
-    ai_response = ask_gemini(full_prompt)
-
-    cleaned_response = clean_text(ai_response)
-    print(f"🤖 Bot says: {cleaned_response}")
-
+    """Sends a prompt to Gemini and returns the text response."""
+    if not gemini_model:
+        return "Sorry, the AI model is not available."
     try:
-        audio = tts_client.text_to_speech.convert(
-            text=cleaned_response,
-            voice_id="2rwOA0PJmS0KagZBMbZF",
-            model_id="eleven_monolingual_v1"
+        print("🤖 Thinking...")
+        # Your custom pirate prompt
+        pirate_prompt = (
+            
+            f"Keep your answers short and focused. "
+            f"Here is the user's question: {prompt}"
         )
-        with open("response.mp3", "wb") as f:
-            for chunk in audio:
-                f.write(chunk)
-        print("🔊 MP3 saved as response.mp3")
+        response = gemini_model.generate_content(pirate_prompt)
+        ai_response = response.text.strip()
+        print(f"🤖 Bot says: {ai_response}")
+        return ai_response
     except Exception as e:
-        print(f"⚠️ ElevenLabs TTS failed: {e}")
-        tts_fallback(cleaned_response, filename="response.mp3")
+        print(f"❌ Error with Gemini: {e}")
+        return "Sorry, I be havin' trouble thinkin' right now."
 
-    mp3_audio = AudioSegment.from_file("response.mp3", format="mp3")
-    louder_audio = mp3_audio + 0
-    wav_audio = louder_audio.set_channels(1).set_sample_width(2).set_frame_rate(22050)
-    wav_audio.export("response.wav", format="wav")
-    print("🔊 WAV saved as response.wav (louder, ready for ESP32 playback)")
-
-    info = mediainfo("response.wav")
-    duration = float(info['duration'])
-
-
-# play_talking_animation(duration)
-
-def send_wav_over_wifi(ip, port, wav_path="response.wav"):
-    print(f"📡 Connecting to ESP32 at {ip}:{port}...")
+def generate_tts(text: str, output_path: str):
+    """Generates audio from text using gTTS and saves it as a WAV file."""
     try:
-        with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as sock:
-            sock.connect((ip, port))
-            print("✅ Connected to ESP32!")
+        print("🔊 Generating speech with gTTS...")
+        tts = gTTS(text=text, lang='en')
+        # Save to a temporary mp3 file
+        tts.save("response.mp3")
 
-            with open(wav_path, "rb") as f:
-                while True:
-                    chunk = f.read(1024)  # send 1024 bytes per chunk
+        # Convert MP3 to WAV for the ESP32
+        mp3_audio = AudioSegment.from_file("response.mp3", format="mp3")
+        wav_audio = mp3_audio.set_channels(1).set_sample_width(2).set_frame_rate(22050) # ESP speaker likes 22050Hz
+        wav_audio.export(output_path, format="wav")
+
+        print(f"✅ Speech audio saved to {output_path}")
+
+    except Exception as e:
+        print(f"❌ Error generating TTS with gTTS: {e}")
+
+
+def send_audio_to_esp32(sock, wav_path):
+    """Sends a command and then a WAV file to the ESP32 over the given socket."""
+    try:
+        # 1. Send the command to switch to PLAY mode
+        print(" commanding ESP32 to play audio...")
+        sock.sendall(b"PLAY\n")
+        time.sleep(0.1) # Give ESP32 a moment to switch modes
+
+        # 2. Send the WAV file
+        print(f"📡 Streaming {wav_path} to ESP32...")
+        with open(wav_path, "rb") as f:
+            # Larger chunks reduce syscalls and pacing gaps
+            while True:
+                chunk = f.read(4096)
+                if not chunk:
+                    break
+                sock.sendall(chunk)
+        print("✅ Finished sending audio.")
+    except Exception as e:
+        print(f"❌ Error sending audio to ESP32: {e}")
+
+# === Main Application Loop ===
+
+def main_loop():
+    """The main loop that connects, listens, and interacts."""
+    while True:
+        audio_buffer = bytearray()
+        try:
+            # --- 1. Connect to ESP32 ---
+            print(f"📡 Trying to connect to ESP32 at {ESP32_IP}:{PORT}...")
+            with socket.socket(socket.AF_INET, socket.SOCK_STREAM) as s:
+                # Reduce Nagle-induced delays
+                s.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+                s.connect((ESP32_IP, PORT))
+                print("✅ Connected to ESP32! Listening for wake word...")
+
+                # --- 2. Listen for Wake Word ---
+                wake_word_detected = False
+                while not wake_word_detected:
+                    data = s.recv(1024)
+                    if not data:
+                        print("Connection lost.")
+                        break
+                    audio_buffer += data
+
+                    while len(audio_buffer) >= BUFFER_SIZE_PORCUPINE_FRAME:
+                        frame_data = audio_buffer[:BUFFER_SIZE_PORCUPINE_FRAME]
+                        audio_buffer = audio_buffer[BUFFER_SIZE_PORCUPINE_FRAME:]
+                        
+                        pcm_frame = convert_i2s_to_pcm(frame_data)
+                        
+                        if porcupine and porcupine.process(pcm_frame) >= 0:
+                            print("🟢 Wake word detected!")
+                            wake_word_detected = True
+                            break
+                
+                if not wake_word_detected:
+                    continue # Loop back to reconnect if connection was lost
+
+                # --- 3. Record Prompt ---
+                print("🎤 Recording prompt for 5 seconds...")
+                prompt_audio_data = bytearray()
+                start_time = time.time()
+                while time.time() - start_time < 5.0:
+                    # Keep draining the socket
+                    chunk = s.recv(2048)
                     if not chunk:
                         break
-                    sock.sendall(chunk)
-                    # Optional tiny delay to avoid flooding
-                    # time.sleep(0.001)
-            print("✅ Finished sending WAV file over Wi-Fi.")
-    except Exception as e:
-        print(f"❌ Error sending WAV over Wi-Fi: {e}")
+                    prompt_audio_data += chunk
+                
+                print("✅ Finished recording prompt.")
+                full_pcm_data = convert_i2s_to_pcm(prompt_audio_data)
+                save_pcm_to_wav(full_pcm_data, PROMPT_WAV_PATH, SAMPLE_RATE, CHANNELS)
 
-ESP32_IP = "192.168.1.47"   # <-- Replace with your ESP32's IP address from Serial Monitor
-ESP32_PORT = 12345         # <-- This matches the port in your ESP32 sketch
+                # --- 4. Process and Respond ---
+                if whisper_model:
+                    result = whisper_model.transcribe(PROMPT_WAV_PATH)
+                    user_prompt = result.get("text", "").strip()
+                    print(f"💬 You said: {user_prompt}")
 
-send_wav_over_wifi(ESP32_IP, ESP32_PORT, "response.wav")
+                    if user_prompt:
+                        ai_response = ask_gemini(user_prompt)
+                        generate_tts(ai_response, RESPONSE_WAV_PATH)
+                        
+                        # --- 5. Send Audio for Playback ---
+                        if os.path.exists(RESPONSE_WAV_PATH):
+                            send_audio_to_esp32(s, RESPONSE_WAV_PATH)
+                    else:
+                        print("No clear prompt detected.")
+
+            # The 'with socket' block closes the connection here, signaling the ESP32
+            # to reset to listening mode.
+
+        except (ConnectionRefusedError, TimeoutError):
+            print(f"Connection to {ESP32_IP} failed. Retrying in 5 seconds...")
+            time.sleep(5)
+        except Exception as e:
+            print(f"An unexpected error occurred: {e}")
+            print("Restarting loop in 10 seconds...")
+            time.sleep(10)
+
+
+if __name__ == "__main__":
+    if not all([porcupine, whisper_model, gemini_model]):
+        print(" A critical component failed to initialize. Please check API keys and configurations. Exiting.")
+    else:
+        try:
+            main_loop()
+        except KeyboardInterrupt:
+            print("\n🛑 Shutting down.")
+        finally:
+            if porcupine:
+                porcupine.delete()
