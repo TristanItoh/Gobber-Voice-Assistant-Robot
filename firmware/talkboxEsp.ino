@@ -130,9 +130,6 @@ bool parseWavHeader(uint32_t &sampleRate, uint16_t &bitsPerSample) {
 }
 
 void playAudioFromClient() {
-    // Ensure stream reads do not block for too long
-    client.setTimeout(20); // 20 ms read timeout to keep audio flowing
-
     if (!headerParsedForPlayback) {
         if (client.available() >= WAV_HEADER_SIZE) {
             uint32_t sampleRate = 0;
@@ -147,20 +144,21 @@ void playAudioFromClient() {
             }
         }
     } else {
-        static uint8_t silence[I2S_SPEAKER_BUFFER_SIZE]; // zero-initialized
-        uint8_t buffer[I2S_SPEAKER_BUFFER_SIZE];
-        size_t bytes_read = client.readBytes(buffer, I2S_SPEAKER_BUFFER_SIZE);
-        const uint8_t* out_ptr = buffer;
-        size_t out_len = bytes_read;
-        if (bytes_read == 0) {
-            // No data arrived within timeout; write a buffer of silence to avoid gaps
-            out_ptr = silence;
-            out_len = sizeof(silence);
+        if (client.available()) {
+            uint8_t buffer[I2S_SPEAKER_BUFFER_SIZE];
+            size_t bytes_read = client.read(buffer, I2S_SPEAKER_BUFFER_SIZE);
+            if (bytes_read > 0) {
+                size_t bytes_written = 0;
+                i2s_write(i2s_port, buffer, bytes_read, &bytes_written, portMAX_DELAY);
+                if (bytes_written != bytes_read) {
+                  Serial.printf("I2S write warning: read %d, wrote %d\n", bytes_read, bytes_written);
+                }
+            }
         }
-
-        size_t bytes_written = 0;
-        i2s_write(i2s_port, out_ptr, out_len, &bytes_written, portMAX_DELAY);
-        // It's okay if bytes_written < out_len occasionally; DMA may be busy
+        // ** THE FIX **
+        // We no longer have an 'else' block that prematurely calls client.stop().
+        // We let the Python script decide when the stream is over by closing the connection.
+        // The main loop() will detect the disconnection and reset the state robustly.
     }
 }
 
