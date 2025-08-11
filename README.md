@@ -1,15 +1,21 @@
-# Gobber: Voice Assistant Robot 🤖
+# Gobber: Voice Assistant Robot 
 A voice assistant robot that listens to requests and responds, powered by Gemini and OpenAI Whisper, all with custom animations to give it a personality.
 
 ## Why?
 I've been wanting to make this project for a while but never fully commited to it. Now I finally have the opportunity to. The project is inspired by voice assistants on mobile devices, like Siri, but with a physical body and animated face.
 
-## Technical Overview:
+## Overview:
 This robot uses a combination of hardware, software, and firmware:
-- 🔧 **Hardware**: Controlled by an ESP32-S3 that will be plugged into the computer, recieves input from the microphone, and outputs audio through the audio amp and speaker.
-- 🪲 **Firmware**: Basic code for the ESP32 as sort of a gate between the hardware and the Python software on the computer. Audio in, audio out.
-- 💻 **Software**: Recieves mp3 files of input audio, translates it to text using OpenAI whisper, passes it into Gemini with context, then finally generates text-to-speech using ElevenLabs with a goofy voice.
-- 🔩 **CAD**: Very smooth, curvy, triangular shape. Round display centered on the front, with holes for USB-c, microphone, and speaker.
+
+### Hardware: 
+Controlled by an ESP32-S3 that will be plugged into the computer, recieves input from the microphone, and outputs audio through the audio amp and speaker.
+### Firmware: 
+Basic code for the ESP32 as sort of a gate between the hardware and the Python software on the computer. Audio in, audio out.
+### Software: 
+Recieves mp3 files of input audio, translates it to text using OpenAI whisper, passes it into Gemini with context, then finally generates text-to-speech using ElevenLabs with a goofy voice.
+### CAD: 
+Very smooth, curvy, triangular shape. Round display centered on the front, with holes for USB-c, microphone, and speaker.
+<br>
 
 <img width="1051" height="950" alt="Screenshot 2025-07-31 185853" src="https://github.com/user-attachments/assets/b8ddd656-c2fc-4fae-9815-ac807235c0cb" />
 <img width="990" height="1079" alt="Screenshot 2025-07-31 195330" src="https://github.com/user-attachments/assets/282c9ee6-6aba-4059-9938-6b4f43bbb64a" />
