@@ -5,6 +5,7 @@ description: "A robotic voice-assistant with an animated face and computer funct
 created_at: "2024-06-11"
 ---
 ### Total Time Spent: 14.5 Hours
+### Total Build Time Spent: ~12 Hours
 # Journal
 
 ## Day 1 - June 14
