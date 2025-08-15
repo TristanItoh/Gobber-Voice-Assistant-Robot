@@ -38,3 +38,13 @@ Very smooth, curvy, triangular shape. Round display centered on the front, with 
 **Total:** **$10.40**          
 
 [Sheet With Links](https://docs.google.com/spreadsheets/d/1rEzeNBBt6LBTQF6fnU12Dy_3lUBRjMwdXFT9IxuN5R0/edit?usp=sharing)
+
+## Finished Build + Demo
+
+Here's how the finished Gobber looks:
+
+![20250807_200212](https://github.com/user-attachments/assets/8b94d14d-94f2-4141-b8c1-8881c712ef32)
+![20250807_200219](https://github.com/user-attachments/assets/fe7ad15e-20eb-4828-9923-f1417954aa83)
+
+And a video of it working:
+[https://www.reddit.com/r/esp32/comments/1mkkhbk/made_my_own_voice_assistant_with_gemini/](https://www.reddit.com/r/esp32/comments/1mkkhbk/made_my_own_voice_assistant_with_gemini/?utm_source=share&utm_medium=web3x&utm_name=web3xcss&utm_term=1&utm_content=share_button)
